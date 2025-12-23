@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Aesthetic Architecture | Optimization Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070708;
+            --accent-gold: #fbbf24;
+            --accent-glow: rgba(251, 191, 36, 0.6); 
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 50% -10%, rgba(251, 191, 36, 0.35) 0%, transparent 70%),
+                radial-gradient(circle at 0% 100%, rgba(251, 191, 36, 0.2) 0%, transparent 60%),
+                radial-gradient(circle at 100% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(217, 119, 6, 0.18) 0%, transparent 50%),
+                linear-gradient(to bottom, #0d0d0e, #050505);
+            z-index: -1;
+        }
+
+        .glow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.08) 0%, transparent 80%);
+            pointer-events: none;
+            z-index: -1;
+            animation: pulseGlow 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { opacity: 0.5; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.3); }
+        }
+
+        .glass-card {
+            background: rgba(18, 18, 22, 0.75);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+            box-shadow: 0 25px 60px -15px rgba(0,0,0,0.95);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 50px rgba(251, 191, 36, 0.15);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 20%, #fbbf24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: #000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 45px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            color: white;
+            appearance: none;
+        }
+
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--accent-gold);
+            outline: none;
+        }
+
+        .step-transition {
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .workout-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        .workout-table th {
+            text-align: left;
+            padding: 12px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #71717a;
+        }
+        .workout-table td {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 13px;
+        }
+        .workout-table tr td:first-child { border-radius: 12px 0 0 12px; color: white; font-weight: 600; }
+        .workout-table tr td:last-child { border-radius: 0 12px 12px 0; color: #fbbf24; font-family: monospace; font-weight: bold; }
+
+        .loader {
+            border: 2px solid #000;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="bg-glow"></div>
+    <div class="glow-overlay"></div>
+
+    <nav class="p-8 flex justify-between items-center max-w-6xl mx-auto relative z-10">
+        <div class="text-xl font-800 tracking-tighter uppercase text-white cursor-pointer" onclick="location.reload()">Aesthetic<span class="text-yellow-500">Architecture</span></div>
+        <div class="hidden md:flex space-x-10 text-[10px] font-bold tracking-[0.3em] text-gray-500 uppercase">
+            <span class="hover:text-yellow-400 cursor-pointer" onclick="navigateTo('page-optin')">Protocol</span>
+            <span class="hover:text-yellow-400 cursor-pointer" onclick="navigateTo('page-application')">Coaching</span>
+            <span class="hover:text-yellow-400 cursor-pointer" onclick="promptAdminAccess()">Master</span>
+        </div>
+    </nav>
+
+    <main id="app" class="max-w-5xl mx-auto px-6 pt-8 pb-24 relative z-10">
+        
+        <!-- PAGE 1 — OPT-IN PAGE -->
+        <div id="page-optin" class="step-transition">
+            <div class="text-center mb-20">
+                <span class="inline-block px-5 py-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-8 shadow-[0_0_30px_rgba(251,191,36,0.3)]">
+                    Elite Aesthetic Optimization
+                </span>
+                <h1 class="text-6xl md:text-8xl font-800 tracking-tighter mb-8 text-gradient leading-[1.1]">
+                    The Architecture <br>of Presence
+                </h1>
+                <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+                    A comprehensive guide to enhancing facial harmony, skeletal alignment, and muscular proportions.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-5 gap-8 items-start mb-16">
+                <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-8 rounded-3xl md:col-span-2">
+                        <h3 class="text-yellow-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-4">I. Craniofacial Posture</h3>
+                        <p class="text-gray-400 text-sm">Developing optimal tongue posture and nasal breathing for jawline definition.</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-3xl">
+                        <h3 class="text-yellow-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-4">II. Skeletal Alignment</h3>
+                        <p class="text-gray-400 text-sm">Correcting APT and forward head posture to maximize height.</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-3xl">
+                        <h3 class="text-yellow-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-4">III. V-Taper Ratio</h3>
+                        <p class="text-gray-400 text-sm">Targeted deltoid and lat development for the male silhouette.</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card p-10 rounded-[2.5rem] relative overflow-hidden">
+                    <h3 class="text-2xl font-bold mb-8 text-white tracking-tight">Access Guide</h3>
+                    <form id="optin-form" onsubmit="handleOptIn(event)" class="space-y-5">
+                        <input type="text" id="opt-name" placeholder="Full Name" required class="input-field w-full p-4 rounded-xl text-sm">
+                        <input type="email" id="opt-email" placeholder="Email Address" required class="input-field w-full p-4 rounded-xl text-sm">
+                        <button type="submit" id="optin-btn" class="btn-primary w-full font-bold py-5 rounded-2xl text-[11px] uppercase tracking-[0.3em] mt-2 flex justify-center items-center gap-2">
+                            <span>Get Free Access</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2 — DELIVERY PAGE -->
+        <div id="page-delivery" class="hidden step-transition">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 text-white tracking-tight text-gradient">The Blueprint Unlocked</h2>
+                <p class="text-gray-400 font-light">Your high-value transformation begins with daily discipline.</p>
+            </div>
+
+            <div class="glass-card rounded-[2rem] overflow-hidden border-white/10 mb-12">
+                <div class="bg-white/[0.03] p-8 border-b border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center space-x-6">
+                        <div class="w-14 h-16 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex items-center justify-center text-[10px] font-black text-yellow-500">PRO</div>
+                        <div>
+                            <h4 class="font-bold text-base text-white">Daily_Aesthetic_Manual.pdf</h4>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em] mt-1">Status: Fully Unlocked</p>
+                        </div>
+                    </div>
+                    <button onclick="togglePdfPreview()" class="px-8 py-3 rounded-full border border-yellow-500/30 text-[10px] font-bold text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all uppercase tracking-widest">
+                        Expand Protocol
+                    </button>
+                </div>
+
+                <!-- NEW HIGH-VALUE CONTENT -->
+                <div id="pdf-preview" class="hidden p-10 bg-black/40 border-b border-white/5 space-y-12">
+                    <section>
+                        <h5 class="text-yellow-500 text-[11px] font-black uppercase tracking-[0.3em] mb-6">Phase 1: Facial Structure & Breathing</h5>
+                        <p class="text-sm text-gray-400 mb-6 leading-relaxed">True presence starts with nasal dominance. Keep your mouth closed and tongue on the roof of your mouth (Mewing) throughout the day to support maxilla growth.</p>
+                        <table class="workout-table">
+                            <thead><tr><th>Habit</th><th>Action</th><th>Target</th></tr></thead>
+                            <tbody>
+                                <tr><td>Tongue Posture</td><td>Sealed against palate</td><td>24/7</td></tr>
+                                <tr><td>Nasal Breathing</td><td>Filtered inhalation</td><td>Consistency</td></tr>
+                                <tr><td>Hard Chewing</td><td>Engage masseters</td><td>15m/Day</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section>
+                        <h5 class="text-yellow-500 text-[11px] font-black uppercase tracking-[0.3em] mb-6">Phase 2: Skeletal Foundation</h5>
+                        <p class="text-sm text-gray-400 mb-6 leading-relaxed">Modern desk work destroys your silhouette. Implement these to maximize height and shoulder width.</p>
+                        <table class="workout-table">
+                            <thead><tr><th>Habit</th><th>Action</th><th>Target</th></tr></thead>
+                            <tbody>
+                                <tr><td>Wall Stand</td><td>Back/Heels flush to wall</td><td>5 Mins/Day</td></tr>
+                                <tr><td>Chin Tucks</td><td>Deep neck stabilization</td><td>3 Sets x 10</td></tr>
+                                <tr><td>Dead Hangs</td><td>Decompress vertebrae</td><td>1 Min x 3</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section>
+                        <h5 class="text-yellow-500 text-[11px] font-black uppercase tracking-[0.3em] mb-6">Phase 3: Restorative Resilience</h5>
+                        <p class="text-sm text-gray-400 mb-6 leading-relaxed">Aesthetics are won during recovery. Poor sleep quality leads to dark circles and facial puffiness.</p>
+                        <table class="workout-table">
+                            <thead><tr><th>Habit</th><th>Action</th><th>Target</th></tr></thead>
+                            <tbody>
+                                <tr><td>Blue Light Cut</td><td>No screens before bed</td><td>1 Hour</td></tr>
+                                <tr><td>Mouth Taping</td><td>Force nasal breathing</td><td>Overnight</td></tr>
+                                <tr><td>Deep Hydration</td><td>Electrolytes + Water</td><td>3L/Day</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-6 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl">
+                            <p class="text-[10px] text-yellow-500 font-bold uppercase mb-2">Posture Tip</p>
+                            <p class="text-xs text-gray-400">Avoid "Tech Neck" by lifting your phone to eye level. Every inch of forward head tilt adds 10lbs of pressure to your spine.</p>
+                        </div>
+                        <div class="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                            <p class="text-[10px] text-white font-bold uppercase mb-2">Eye Health</p>
+                            <p class="text-xs text-gray-400">Use the 20-20-20 rule. Every 20 minutes, look at something 20 feet away for 20 seconds to reduce strain.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-16 text-center bg-yellow-500/[0.02]">
+                    <h3 class="text-2xl font-bold mb-6 text-white tracking-tight">Personalized Strategic Intake</h3>
+                    <p class="text-gray-400 text-sm mb-10 max-w-md mx-auto">For those ready to skip the trial-and-error. Get a custom assessment from our lead architects.</p>
+                    <button onclick="navigateTo('page-application')" class="btn-primary px-12 py-5 rounded-2xl font-bold text-[10px] uppercase tracking-[0.3em]">
+                        Apply for Coaching
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3 — APPLICATION PAGE -->
+        <div id="page-application" class="hidden step-transition">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-4 text-white tracking-tight">Coaching Application</h2>
+                    <p class="text-gray-500 font-bold text-[10px] uppercase tracking-[0.4em]">Strategic Intake Phase</p>
+                </div>
+
+                <div class="glass-card p-8 md:p-12 rounded-[2.5rem]">
+                    <form id="coaching-form" onsubmit="handleCoachingSubmit(event)" class="space-y-10">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Applicant Name</label>
+                                <input type="text" id="app-name" required class="input-field w-full p-4 rounded-xl text-sm">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Phone Number</label>
+                                <input type="tel" id="app-phone" placeholder="+1 (555) 000-0000" required class="input-field w-full p-4 rounded-xl text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Focus Area</label>
+                                <input type="text" id="app-focus" placeholder="Face / Body / Posture" required class="input-field w-full p-4 rounded-xl text-sm">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Daily Discipline (1-10)</label>
+                                <input type="number" id="app-discipline" min="1" max="10" required class="input-field w-full p-4 rounded-xl text-sm">
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">What is your "Why"?</label>
+                            <p class="text-[11px] text-gray-600 mb-2 italic">Why is reaching your physical peak a necessity for you right now?</p>
+                            <textarea id="app-why" rows="3" required placeholder="My motivation is..." class="input-field w-full p-4 rounded-xl text-sm"></textarea>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">What's the biggest obstacle holding you back?</label>
+                            <input type="text" id="app-obstacle" placeholder="E.g. Consistency, Knowledge, Genetics..." required class="input-field w-full p-4 rounded-xl text-sm">
+                        </div>
+                        
+                        <button type="submit" id="coaching-btn" class="btn-primary w-full font-bold py-6 rounded-2xl text-[11px] uppercase tracking-[0.3em] flex justify-center items-center gap-2">
+                            <span>Submit Application</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4 — THANK YOU PAGE -->
+        <div id="page-thankyou" class="hidden step-transition py-24 text-center">
+            <div class="w-28 h-28 bg-yellow-500/10 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-yellow-500/30 rotate-12">
+                <svg class="w-12 h-12 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h2 class="text-5xl font-bold mb-6 text-gradient tracking-tighter">Application Queued</h2>
+            <p class="text-gray-400 font-light max-w-md mx-auto mb-16">We will finalize your assessment within 48 business hours.</p>
+            <button onclick="location.reload()" class="text-[10px] font-bold uppercase tracking-[0.5em] text-gray-600 hover:text-yellow-400 transition-colors">Return to Dashboard</button>
+        </div>
+
+        <!-- ADMIN VIEW (LEADS) -->
+        <div id="page-admin" class="hidden step-transition">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-bold text-white tracking-tight">Master Lead Directory</h2>
+                <button onclick="navigateTo('page-optin')" class="text-xs text-gray-500 hover:text-white uppercase tracking-widest">Close</button>
+            </div>
+            <div id="leads-container" class="space-y-4">
+                <p class="text-gray-500 italic">Connecting to secure data streams...</p>
+            </div>
+        </div>
+
+        <!-- PASSWORD MODAL -->
+        <div id="password-modal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+            <div class="glass-card p-10 rounded-[2rem] w-full max-w-sm text-center">
+                <h3 class="text-white font-bold mb-6 tracking-tight">Access Protocol Required</h3>
+                <input type="password" id="admin-pass" placeholder="Enter Access Code" class="input-field w-full p-4 rounded-xl text-center text-sm mb-6 tracking-widest">
+                <div class="flex flex-col gap-3">
+                    <button onclick="verifyAdminAccess()" class="btn-primary w-full py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest">Verify Identity</button>
+                    <button onclick="closeAdminPrompt()" class="text-[9px] text-gray-600 uppercase font-bold tracking-widest hover:text-white mt-2">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center pb-12 opacity-40 relative z-10">
+        <p class="text-[9px] font-bold text-gray-500 uppercase tracking-[0.6em] mb-4">&copy; 2024 AESTHETIC ARCHITECTURE PROTOCOL</p>
+        <button onclick="promptAdminAccess()" class="text-[8px] text-gray-700 hover:text-yellow-600 uppercase tracking-[0.2em] transition-colors cursor-pointer">Internal Lead Portal</button>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Global state
+        let db, auth, currentUser = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'aesthetic-architecture';
+
+        // Initialize Firebase
+        const initFirebase = async () => {
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Auth Logic
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) initLeadsListener();
+                });
+            } catch (e) {
+                console.error("Firebase Init Error:", e);
+            }
+        };
+
+        initFirebase();
+
+        window.navigateTo = (pageId) => {
+            document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.promptAdminAccess = () => {
+            document.getElementById('password-modal').classList.remove('hidden');
+            document.getElementById('admin-pass').focus();
+        };
+
+        window.closeAdminPrompt = () => {
+            document.getElementById('password-modal').classList.add('hidden');
+            document.getElementById('admin-pass').value = '';
+        };
+
+        window.verifyAdminAccess = () => {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === '1974') {
+                closeAdminPrompt();
+                navigateTo('page-admin');
+            } else {
+                const input = document.getElementById('admin-pass');
+                input.classList.add('border-red-500');
+                setTimeout(() => input.classList.remove('border-red-500'), 1000);
+            }
+        };
+
+        window.togglePdfPreview = () => {
+            document.getElementById('pdf-preview').classList.toggle('hidden');
+        };
+
+        window.handleOptIn = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('optin-btn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loader"></div>';
+
+            const leadData = {
+                type: 'Opt-In',
+                name: document.getElementById('opt-name').value,
+                email: document.getElementById('opt-email').value,
+                timestamp: new Date().toISOString()
+            };
+
+            if (currentUser && db) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'leads'), leadData);
+                } catch (err) {
+                    console.error("Save error:", err);
+                }
+            }
+            navigateTo('page-delivery');
+            btn.innerHTML = originalHtml;
+        };
+
+        window.handleCoachingSubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('coaching-btn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<div class="loader"></div>';
+
+            const applicationData = {
+                type: 'Coaching App',
+                name: document.getElementById('app-name').value,
+                phone: document.getElementById('app-phone').value,
+                focus: document.getElementById('app-focus').value,
+                discipline: document.getElementById('app-discipline').value,
+                why: document.getElementById('app-why').value,
+                obstacle: document.getElementById('app-obstacle').value,
+                timestamp: new Date().toISOString()
+            };
+
+            if (currentUser && db) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'leads'), applicationData);
+                } catch (err) {
+                    console.error("Save error:", err);
+                }
+            }
+            navigateTo('page-thankyou');
+            btn.innerHTML = originalHtml;
+        };
+
+        function initLeadsListener() {
+            if (!db || !currentUser) return;
+            const leadsRef = collection(db, 'artifacts', appId, 'public', 'data', 'leads');
+            
+            onSnapshot(leadsRef, (snapshot) => {
+                const container = document.getElementById('leads-container');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="glass-card p-10 text-center opacity-50">No leads detected in the architecture yet.</div>';
+                    return;
+                }
+
+                snapshot.docs.forEach(docSnap => {
+                    const lead = docSnap.data();
+                    const card = document.createElement('div');
+                    card.className = 'glass-card p-6 rounded-2xl flex flex-col md:flex-row justify-between gap-4 items-start border-l-4 border-l-yellow-500';
+                    
+                    let detailsHtml = `<div class="space-y-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-[9px] px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-500 font-bold uppercase">${lead.type || 'Lead'}</span>
+                                            <span class="text-[9px] text-gray-500">${new Date(lead.timestamp).toLocaleDateString()} ${new Date(lead.timestamp).toLocaleTimeString()}</span>
+                                        </div>
+                                        <h4 class="text-white font-bold text-lg">${lead.name}</h4>`;
+                    
+                    if (lead.email) detailsHtml += `<p class="text-gray-400 text-sm">Email: <span class="text-white">${lead.email}</span></p>`;
+                    if (lead.phone) detailsHtml += `<p class="text-gray-400 text-sm">Phone: <span class="text-white">${lead.phone}</span></p>`;
+                    
+                    if (lead.type === 'Coaching App') {
+                        detailsHtml += `<div class="mt-4 p-4 bg-white/5 rounded-xl text-xs space-y-3 border border-white/5">
+                            <p><span class="text-yellow-500 font-bold uppercase tracking-tighter">Focus:</span> ${lead.focus}</p>
+                            <p><span class="text-yellow-500 font-bold uppercase tracking-tighter">Discipline:</span> ${lead.discipline}/10</p>
+                            <p><span class="text-yellow-500 font-bold uppercase tracking-tighter">Why:</span> ${lead.why}</p>
+                            <p><span class="text-yellow-500 font-bold uppercase tracking-tighter">Obstacle:</span> ${lead.obstacle}</p>
+                        </div>`;
+                    }
+                    detailsHtml += `</div>`;
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'text-[10px] text-red-500/50 hover:text-red-500 uppercase font-bold tracking-widest transition-colors self-end md:self-start';
+                    delBtn.innerText = 'Clear Record';
+                    delBtn.onclick = async () => {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leads', docSnap.id));
+                    };
+
+                    card.innerHTML = detailsHtml;
+                    card.appendChild(delBtn);
+                    container.appendChild(card);
+                });
+            }, (err) => {
+                console.error("Listener error:", err);
+                const container = document.getElementById('leads-container');
+                if (container) container.innerHTML = `<div class="p-4 bg-red-500/10 text-red-500 rounded-lg text-xs">Error connecting to data: ${err.message}</div>`;
+            });
+        }
+    </script>
+</body>
+</html>
